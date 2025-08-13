@@ -35,24 +35,34 @@
         color: #d4af37;
         font-weight: bold;
     }
+    .digital {
+        text-align: center;
+        font-size: 16px;
+        color: #ffd700;
+        margin-top: 5px;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
     <div class="clocks">
         <div>
             <canvas id="clockIST"></canvas>
-            <div class="label">Sadik Pathan - IST</div>
+            <div class="label">IST Time</div>
+            <div class="digital" id="digitalIST"></div>
         </div>
         <div>
             <canvas id="clockMoline"></canvas>
-            <div class="label">Sadik Pathan - Moline</div>
+            <div class="label">Moline Time</div>
+            <div class="digital" id="digitalMoline"></div>
         </div>
     </div>
 
 <script>
-function setupClock(canvasId, timeZone) {
+function setupClock(canvasId, digitalId, timeZone) {
     const canvas = document.getElementById(canvasId);
     const ctx = canvas.getContext("2d");
+    const digitalDisplay = document.getElementById(digitalId);
 
     function resizeCanvas() {
         let size = Math.min(window.innerWidth / 2.5, window.innerHeight / 1.5);
@@ -70,6 +80,7 @@ function setupClock(canvasId, timeZone) {
         drawNumbers(ctx, radius);
         drawBrand(ctx, radius);
         drawTime(ctx, radius);
+        updateDigital();
     }
 
     function drawFace(ctx, radius) {
@@ -114,7 +125,7 @@ function setupClock(canvasId, timeZone) {
         ctx.font = radius * 0.12 + "px Georgia";
         ctx.fillStyle = "#d4af37";
         ctx.textAlign = "center";
-        ctx.fillText("Sadik Pathan", 0, radius * 0.35);
+        ctx.fillText("Pathan", 0, radius * 0.35);
     }
 
     function drawTime(ctx, radius) {
@@ -149,13 +160,20 @@ function setupClock(canvasId, timeZone) {
         ctx.rotate(-pos);
     }
 
+    function updateDigital() {
+        const now = new Date();
+        const options = { timeZone, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true };
+        const timeString = new Intl.DateTimeFormat('en-US', options).format(now);
+        digitalDisplay.textContent = timeString;
+    }
+
     resizeCanvas();
     setInterval(drawClock, 1000);
     window.addEventListener("resize", resizeCanvas);
 }
 
-setupClock("clockIST", "Asia/Kolkata");
-setupClock("clockMoline", "America/Chicago");
+setupClock("clockIST", "digitalIST", "Asia/Kolkata");
+setupClock("clockMoline", "digitalMoline", "America/Chicago");
 </script>
 </body>
 </html>
