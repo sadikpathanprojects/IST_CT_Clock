@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dual Luxury Clocks</title>
+<style>
+    body {
+        background: radial-gradient(circle at center, #222 0%, #000 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+    .clocks {
+        display: flex;
+        gap: 50px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    canvas {
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.1);
+        max-width: 40vw;
+        max-height: 40vw;
+    }
+    .label {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 18px;
+        color: #d4af37;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+    <div class="clocks">
+        <div>
+            <canvas id="clockIST"></canvas>
+            <div class="label">Sadik Pathan - IST</div>
+        </div>
+        <div>
+            <canvas id="clockMoline"></canvas>
+            <div class="label">Sadik Pathan - Moline</div>
+        </div>
+    </div>
+
+<script>
+function setupClock(canvasId, timeZone) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+        let size = Math.min(window.innerWidth / 2.5, window.innerHeight / 1.5);
+        canvas.width = size;
+        canvas.height = size;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.translate(size / 2, size / 2);
+        radius = size / 2;
+    }
+    let radius;
+
+    function drawClock() {
+        ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
+        drawFace(ctx, radius);
+        drawNumbers(ctx, radius);
+        drawBrand(ctx, radius);
+        drawTime(ctx, radius);
+    }
+
+    function drawFace(ctx, radius) {
+        const grad = ctx.createRadialGradient(0, 0, radius * 0.9, 0, 0, radius * 1.05);
+        grad.addColorStop(0, '#ccc');
+        grad.addColorStop(0.5, '#888');
+        grad.addColorStop(1, '#222');
+        ctx.beginPath();
+        ctx.arc(0, 0, radius - 5, 0, 2 * Math.PI);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.92, 0, 2 * Math.PI);
+        ctx.fillStyle = "#111";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.04, 0, 2 * Math.PI);
+        ctx.fillStyle = "#d4af37";
+        ctx.fill();
+    }
+
+    function drawNumbers(ctx, radius) {
+        ctx.font = radius * 0.15 + "px serif";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fff";
+        for (let num = 1; num <= 12; num++) {
+            let ang = num * Math.PI / 6;
+            ctx.rotate(ang);
+            ctx.translate(0, -radius * 0.78);
+            ctx.rotate(-ang);
+            ctx.fillText(num.toString(), 0, 0);
+            ctx.rotate(ang);
+            ctx.translate(0, radius * 0.78);
+            ctx.rotate(-ang);
+        }
+    }
+
+    function drawBrand(ctx, radius) {
+        ctx.font = radius * 0.12 + "px Georgia";
+        ctx.fillStyle = "#d4af37";
+        ctx.textAlign = "center";
+        ctx.fillText("Sadik Pathan", 0, radius * 0.35);
+    }
+
+    function drawTime(ctx, radius) {
+        const now = new Date();
+        const options = { timeZone, hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+        const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(now);
+
+        let hour = parseInt(parts.find(p => p.type === 'hour').value);
+        let minute = parseInt(parts.find(p => p.type === 'minute').value);
+        let second = parseInt(parts.find(p => p.type === 'second').value);
+
+        hour = hour % 12;
+        hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
+        drawHand(ctx, hour, radius * 0.5, 6, "#d4af37");
+
+        minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+        drawHand(ctx, minute, radius * 0.72, 4, "#fff");
+
+        second = (second * Math.PI / 30);
+        drawHand(ctx, second, radius * 0.78, 2, "#e74c3c");
+    }
+
+    function drawHand(ctx, pos, length, width, color) {
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = color;
+        ctx.moveTo(0, 0);
+        ctx.rotate(pos);
+        ctx.lineTo(0, -length);
+        ctx.stroke();
+        ctx.rotate(-pos);
+    }
+
+    resizeCanvas();
+    setInterval(drawClock, 1000);
+    window.addEventListener("resize", resizeCanvas);
+}
+
+setupClock("clockIST", "Asia/Kolkata");
+setupClock("clockMoline", "America/Chicago");
+</script>
+</body>
+</html>
